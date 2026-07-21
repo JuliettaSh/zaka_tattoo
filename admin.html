@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZakaTattoo Admin - Panel de Consultas</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Courier New", monospace;
+        background: #0a0a0a;
+        color: #e0e0e0;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        border-bottom: 3px solid #ff3333;
+        padding-bottom: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        color: #ff3333;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+      }
+
+      .stats {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .stat-box {
+        background: #1a1a1a;
+        padding: 1rem 1.5rem;
+        border: 2px solid #ff3333;
+        border-radius: 0;
+      }
+
+      .stat-box strong {
+        color: #ff3333;
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-box span {
+        font-size: 0.9rem;
+        color: #888;
+      }
+
+      .controls {
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: #ff3333;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+        border-radius: 0;
+      }
+
+      button:hover {
+        background: #cc0000;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .search-box {
+        padding: 0.8rem 1.5rem;
+        background: #1a1a1a;
+        border: 2px solid #ff3333;
+        color: #e0e0e0;
+        border-radius: 0;
+        flex-grow: 1;
+        min-width: 250px;
+      }
+
+      .search-box::placeholder {
+        color: #666;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        border: 2px solid #ff3333;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1a1a1a;
+      }
+
+      th {
+        background: #222;
+        color: #ff3333;
+        padding: 1rem;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #ff3333;
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid #333;
+      }
+
+      tr:hover {
+        background: #252525;
+      }
+
+      .id {
+        color: #ff3333;
+        font-weight: bold;
+      }
+
+      .fecha {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn-view {
+        background: #0066cc;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .btn-view:hover {
+        background: #0052a3;
+      }
+
+      .btn-delete {
+        background: #cc0000;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .btn-delete:hover {
+        background: #990000;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: #1a1a1a;
+        border: 3px solid #ff3333;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        border-radius: 0;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #ff3333;
+        padding-bottom: 1rem;
+      }
+
+      .modal-header h2 {
+        color: #ff3333;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+      }
+
+      .modal-close {
+        background: #ff3333;
+        color: white;
+        border: none;
+        width: 35px;
+        height: 35px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-close:hover {
+        background: #cc0000;
+      }
+
+      .modal-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        color: #ff3333;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+      }
+
+      .field value {
+        color: #e0e0e0;
+        padding: 0.8rem;
+        background: #0a0a0a;
+        border: 1px solid #333;
+        word-break: break-word;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #666;
+      }
+
+      .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .stats {
+          flex-wrap: wrap;
+          width: 100%;
+        }
+
+        .stat-box {
+          flex: 1;
+          min-width: 150px;
+        }
+
+        .controls {
+          flex-direction: column;
+        }
+
+        .search-box {
+          min-width: auto;
+        }
+
+        .modal-body {
+          grid-template-columns: 1fr;
+        }
+
+        table {
+          font-size: 0.9rem;
+        }
+
+        th,
+        td {
+          padding: 0.7rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>ZakaTattoo Admin</h1>
+        <div class="stats">
+          <div class="stat-box">
+            <strong id="totalConsultas">0</strong>
+            <span>Total Consultas</span>
+          </div>
+          <div class="stat-box">
+            <strong id="consultasHoy">0</strong>
+            <span>Hoy</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="controls">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-box"
+          placeholder="Buscar por nombre, email o teléfono..."
+        />
+        <button onclick="descargarCSV()">Descargar CSV</button>
+        <button onclick="location.reload()" style="background: #666">
+          Recargar
+        </button>
+        <button onclick="logout()" style="background: #444">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablBody">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 2rem">
+                Cargando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none">
+        <i class="fas fa-inbox"></i>
+        <p>No hay consultas aún</p>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Detalles de Consulta</h2>
+          <button class="modal-close" onclick="cerrarModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Se llena con JS -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let consultas = [];
+
+      async function cargarConsultas() {
+        try {
+          const response = await fetch(`/api/consultas`);
+          if (!response.ok) throw new Error("No autorizado");
+
+          consultas = await response.json();
+          actualizarTabla();
+          actualizarStats();
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("loginForm  ").innerHTML =
+            '<tr><td colspan="7" style="text-align:center;color:#ff3333;">Error cargando datos</td></tr>';
+        }
+      }
+      async function logout() {
+        try {
+          const response = await fetch(`/admin`);
+          if (!response.ok) throw new Error("No se pudo cerrar sesión");
+        } catch (error) {
+          document.getElementById("tablBody").innerHTML =
+            '<tr><td colspan="7" style="text-align:center;color:#ff3333;">Error cerrando sesión</td></tr>';
+        }
+      }
+      function actualizarTabla(filtrado = null) {
+        const datos = filtrado || consultas;
+        const tbody = document.getElementById("tablBody");
+
+        if (datos.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No hay resultados</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = datos
+          .map(
+            (c) => `
+                <tr>
+                    <td class="id">#${c.id}</td>
+                    <td>${c.nombre}</td>
+                    <td>${c.email}</td>
+                    <td>${c.telefono}</td>
+                    <td>${c.tipo}</td>
+                    <td class="fecha">${new Date(c.fecha).toLocaleDateString("es-AR")}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-view" onclick="verDetalles(${c.id})">Ver</button>
+                            <button class="btn-delete" onclick="eliminar(${c.id})">Borrar</button>
+                        </div>
+                    </td>
+                </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function actualizarStats() {
+        const hoy = new Date().toLocaleDateString("es-AR");
+        const consultasHoy = consultas.filter(
+          (c) => new Date(c.fecha).toLocaleDateString("es-AR") === hoy,
+        ).length;
+
+        document.getElementById("totalConsultas").textContent =
+          consultas.length;
+        document.getElementById("consultasHoy").textContent = consultasHoy;
+      }
+
+      async function verDetalles(id) {
+        const consulta = consultas.find((c) => c.id === id);
+        if (!consulta) return;
+
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+                <div class="field full">
+                    <label>Nombre</label>
+                    <value>${consulta.nombre}</value>
+                </div>
+                <div class="field full">
+                    <label>Email</label>
+                    <value>${consulta.email}</value>
+                </div>
+                <div class="field">
+                    <label>Teléfono</label>
+                    <value>${consulta.telefono}</value>
+                </div>
+                <div class="field">
+                    <label>Tipo</label>
+                    <value>${consulta.tipo}</value>
+                </div>
+                <div class="field">
+                    <label>Tamaño</label>
+                    <value>${consulta.tamano}</value>
+                </div>
+                <div class="field">
+                    <label>Ubicación</label>
+                    <value>${consulta.ubicacion}</value>
+                </div>
+                <div class="field full">
+                    <label>Descripción</label>
+                    <value style="min-height: 100px; white-space: pre-wrap;">${consulta.descripcion}</value>
+                </div>
+                <div class="field full">
+                    <label>Fecha y Hora</label>
+                    <value>${new Date(consulta.fecha).toLocaleString("es-AR")}</value>
+                </div>
+            `;
+        document.getElementById("modal").classList.add("active");
+      }
+
+      function cerrarModal() {
+        document.getElementById("modal").classList.remove("active");
+      }
+
+      async function eliminar(id) {
+        if (!confirm("¿Eliminar esta consulta?")) return;
+
+        try {
+          const response = await fetch(`/api/consultas/${id}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            consultas = consultas.filter((c) => c.id !== id);
+            actualizarTabla();
+            actualizarStats();
+            alert("Consulta eliminada");
+          }
+        } catch (error) {
+          alert("Error al eliminar");
+        }
+      }
+
+      async function logout() {
+        try {
+          const response = await fetch("/admin/logout", { method: "POST" });
+          if (response.ok) {
+            window.location.href = "/admin";
+          } else {
+            alert("No se pudo cerrar sesión");
+          }
+        } catch (error) {
+          console.error(error);
+          alert("Error al cerrar sesión");
+        }
+      }
+
+      document.getElementById("searchInput").addEventListener("keyup", (e) => {
+        const filtro = e.target.value.toLowerCase();
+        const filtrado = consultas.filter(
+          (c) =>
+            c.nombre.toLowerCase().includes(filtro) ||
+            c.email.toLowerCase().includes(filtro) ||
+            c.telefono.includes(filtro),
+        );
+        actualizarTabla(filtrado);
+      });
+
+      function descargarCSV() {
+        if (consultas.length === 0) {
+          alert("No hay datos para descargar");
+          return;
+        }
+
+        const headers = [
+          "ID",
+          "Nombre",
+          "Email",
+          "Teléfono",
+          "Tipo",
+          "Tamaño",
+          "Ubicación",
+          "Descripción",
+          "Fecha",
+        ];
+        const rows = consultas.map((c) => [
+          c.id,
+          c.nombre,
+          c.email,
+          c.telefono,
+          c.tipo,
+          c.tamano,
+          c.ubicacion,
+          '"' + c.descripcion.replace(/"/g, '""') + '"',
+          new Date(c.fecha).toLocaleString("es-AR"),
+        ]);
+
+        let csv = headers.join(",") + "\n";
+        rows.forEach((row) => {
+          csv +=
+            row
+              .map((cell) =>
+                typeof cell === "string" && cell.includes(",")
+                  ? `"${cell}"`
+                  : cell,
+              )
+              .join(",") + "\n";
+        });
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `consultas_zaka_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+      }
+
+      // Cargar datos al abrir
+      cargarConsultas();
+      // Recargar cada 30 segundos
+      setInterval(cargarConsultas, 30000);
+
+      // Cerrar modal al hacer click fuera
+      document.getElementById("modal").addEventListener("click", (e) => {
+        if (e.target.id === "modal") cerrarModal();
+      });
+    </script>
+  </body>
+</html>
