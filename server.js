@@ -197,8 +197,8 @@ app.get("/admin.html", (req, res) => {
   res.status(404).send("Not found");
 });
 
-// Servir archivos estáticos (index, img, etc.)
-app.use(express.static("."));
+// Servir archivos estáticos (index, img, etc.) desde la carpeta del proyecto
+app.use(express.static(path.join(__dirname, ".")));
 
 app.listen(PORT, () => {
   console.log(`🎨 Servidor corriendo en puerto ${PORT}`);
