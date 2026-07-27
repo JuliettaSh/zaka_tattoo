@@ -7,7 +7,26 @@ require("dotenv").config();
 const app = express();
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 3000;
+// Mensaje a telegram
+async function notificarTelegram(consulta) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
 
+  const texto = `*Nueva consulta ZakaTattoo*
+👤 ${consulta.nombre}
+📧 ${consulta.email}
+📱 ${consulta.telefono}
+🖋 Tipo: ${consulta.tipo} | Tamaño: ${consulta.tamano}
+📍 ${consulta.ubicacion}
+📝 ${consulta.descripcion}`;
+
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: "Markdown" }),
+  }).catch(err => console.error("Telegram error:", err));
+}
 // Middleware
 app.use(cors());
 app.use(express.json());
