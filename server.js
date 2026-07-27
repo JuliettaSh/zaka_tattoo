@@ -24,8 +24,12 @@ async function notificarTelegram(consulta) {
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: "Markdown" }),
-  }).catch(err => console.error("Telegram error:", err));
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: texto,
+      parse_mode: "Markdown",
+    }),
+  }).catch((err) => console.error("Telegram error:", err));
 }
 // Middleware
 app.use(cors());
@@ -74,6 +78,15 @@ app.post("/api/consultas", (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Error al guardar la consulta" });
       }
+      notificarTelegram({
+        nombre,
+        email,
+        telefono,
+        tipo,
+        tamano,
+        ubicacion,
+        descripcion,
+      });
       res.json({ success: true, id: this.lastID });
     },
   );
