@@ -803,6 +803,68 @@
         }
       }
 
+      /* ===== CALCULADORA ===== */
+      .calc-wrapper {
+        max-width: 750px;
+        margin: 0 auto;
+      }
+      .calc-selects {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      @media (max-width: 600px) {
+        .calc-selects { grid-template-columns: 1fr; }
+      }
+      .calc-result {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: border-color 0.3s ease;
+      }
+      .calc-result.active {
+        border-color: var(--primary);
+      }
+      .calc-result-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+      .calc-result-price {
+        font-family: "Yeseva One", serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        color: var(--primary);
+        line-height: 1.1;
+      }
+      .calc-result-note {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 300;
+      }
+      .calc-result-placeholder {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 300;
+      }
+      .calc-btn {
+        margin-top: 1.5rem;
+        display: none;
+      }
+      .calc-btn.visible {
+        display: inline-block;
+      }
+
       /* ===== SCROLLBAR ===== */
       ::-webkit-scrollbar {
         width: 8px;
@@ -836,6 +898,7 @@
           <li><a href="#galeria">Galería</a></li>
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#proceso">Proceso</a></li>
+          <li><a href="#precios">Precios</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
       </div>
@@ -1329,6 +1392,65 @@
       </div>
     </section>
 
+    <!-- ===== CALCULADORA ===== -->
+    <section id="precios">
+      <h2 class="section-title">
+        <span>Calculá tu Precio</span>
+        <span class="cat-icon">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="45" r="20" fill="currentColor" />
+            <polygon points="36,30 40,12 46,30" fill="currentColor" />
+            <polygon points="54,30 60,12 64,30" fill="currentColor" />
+            <circle cx="43" cy="43" r="4.5" fill="#08070a" />
+            <circle cx="57" cy="43" r="4.5" fill="#08070a" />
+            <circle cx="44" cy="41" r="1.8" fill="white" />
+            <circle cx="58" cy="41" r="1.8" fill="white" />
+            <polygon points="48,50 52,50 50,53" fill="#08070a" />
+            <line x1="34" y1="49" x2="44" y2="51" stroke="#08070a" stroke-width="2" />
+            <line x1="34" y1="53" x2="44" y2="54" stroke="#08070a" stroke-width="2" />
+            <line x1="66" y1="49" x2="56" y2="51" stroke="#08070a" stroke-width="2" />
+            <line x1="66" y1="53" x2="56" y2="54" stroke="#08070a" stroke-width="2" />
+            <ellipse cx="50" cy="74" rx="24" ry="16" fill="currentColor" />
+            <path d="M74,74 Q86,64 80,50" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round" />
+          </svg>
+        </span>
+      </h2>
+      <p class="section-subtitle">Seleccioná el tipo y el tamaño para tener una idea del rango de precios. El valor final se define en la consulta.</p>
+
+      <div class="calc-wrapper">
+        <div class="calc-selects">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="calc-tipo">Tipo de Tatuaje</label>
+            <select class="form-control" id="calc-tipo" onchange="calcularPrecio()">
+              <option value="">Seleccioná...</option>
+              <option value="nuevo">Tatuaje Nuevo</option>
+              <option value="coverup">Cover Up</option>
+              <option value="flash">Flash Design</option>
+              <option value="ornamental">Ornamental</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="calc-tamano">Tamaño</label>
+            <select class="form-control" id="calc-tamano" onchange="calcularPrecio()">
+              <option value="">Seleccioná...</option>
+              <option value="pequeno">Pequeño (&lt; 5cm)</option>
+              <option value="mediano">Mediano (5–15cm)</option>
+              <option value="grande">Grande (&gt; 15cm)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-result" id="calc-result">
+          <p class="calc-result-placeholder">Elegí el tipo y el tamaño para ver el rango estimado.</p>
+        </div>
+
+        <div style="text-align:center">
+          <button class="btn calc-btn" id="calc-cta" onclick="irAFormulario()">Quiero reservar mi turno</button>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== CONTACTO ===== -->
     <section id="contacto">
       <h2 class="section-title">
@@ -1476,6 +1598,53 @@
 
     <!-- ===== SCRIPT ===== -->
     <script>
+      const precios = {
+        nuevo:      { pequeno: "$ 8.000 - 15.000",  mediano: "$ 15.000 - 35.000", grande: "$ 35.000 - 70.000" },
+        coverup:    { pequeno: "$ 12.000 - 20.000", mediano: "$ 20.000 - 50.000", grande: "$ 50.000 - 90.000" },
+        flash:      { pequeno: "$ 6.000 - 10.000",  mediano: "$ 10.000 - 25.000", grande: "$ 25.000 - 45.000" },
+        ornamental: { pequeno: "$ 10.000 - 18.000", mediano: "$ 18.000 - 40.000", grande: "$ 40.000 - 80.000" },
+        otro:       { pequeno: "A consultar",        mediano: "A consultar",       grande: "A consultar" }
+      };
+
+      const tipoLabels = {
+        nuevo: "Tatuaje Nuevo", coverup: "Cover Up",
+        flash: "Flash Design", ornamental: "Ornamental", otro: "Otro"
+      };
+      const tamanoLabels = {
+        pequeno: "Pequeño (< 5cm)", mediano: "Mediano (5–15cm)", grande: "Grande (> 15cm)"
+      };
+
+      function calcularPrecio() {
+        const tipo   = document.getElementById("calc-tipo").value;
+        const tamano = document.getElementById("calc-tamano").value;
+        const result = document.getElementById("calc-result");
+        const cta    = document.getElementById("calc-cta");
+
+        if (!tipo || !tamano) {
+          result.classList.remove("active");
+          result.innerHTML = '<p class="calc-result-placeholder">Elegí el tipo y el tamaño para ver el rango estimado.</p>';
+          cta.classList.remove("visible");
+          return;
+        }
+
+        const precio = precios[tipo][tamano];
+        result.classList.add("active");
+        result.innerHTML = `
+          <span class="calc-result-label">${tipoLabels[tipo]} · ${tamanoLabels[tamano]}</span>
+          <span class="calc-result-price">${precio}</span>
+          <span class="calc-result-note">Precio estimado en pesos argentinos · El valor final se confirma en la consulta</span>
+        `;
+        cta.classList.add("visible");
+      }
+
+      function irAFormulario() {
+        const tipo   = document.getElementById("calc-tipo").value;
+        const tamano = document.getElementById("calc-tamano").value;
+        if (tipo)   document.getElementById("tipo").value   = tipo;
+        if (tamano) document.getElementById("tamano").value = tamano;
+        document.getElementById("contacto").scrollIntoView({ behavior: "smooth" });
+      }
+
       function toggleMenu() {
         const menu = document.getElementById("menu");
         menu.classList.toggle("active");
